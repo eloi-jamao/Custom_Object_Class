@@ -7,7 +7,7 @@ def vid2frames(class_name):
     #for video in vid_folder:
     root = os.getcwd()
     img_folder = root + '/images'
-    video_path = root + '/videos/' + class_name + '.mp4'
+    video_path = root + '/videos/' + class_name
     print(f'Processing video at: {video_path}')
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -37,5 +37,5 @@ def vid2frames(class_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Turning video into frames')
     parser.add_argument('class_name', help='Name of the class')
-    args = parser.parse_args()
+    args = parser.parse_args() 
     vid2frames(args.class_name)
