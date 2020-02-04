@@ -19,7 +19,7 @@ def vid2frames():
         print("The video is too short!")
 
       interval = frame_count // 100
-      print(frame_count)
+      #print(frame_count)
 
       if not cap.isOpened():
         print('Unable to capture video!')
