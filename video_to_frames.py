@@ -19,8 +19,8 @@ def vid2frames():
         print("The video is too short!")
 
       interval = frame_count // 100
-      print(frame_count)
-      
+      #print(frame_count)
+
       if not cap.isOpened():
         print('Unable to capture video!')
       else:
@@ -50,5 +50,3 @@ if __name__ == '__main__':
     #parser.add_argument('class_name', help='Name of the class')
     #args = parser.parse_args()
     vid2frames()
-
-    
