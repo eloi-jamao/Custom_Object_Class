@@ -12,10 +12,13 @@ import argparse
 
 root = os.getcwd()
 images_dir = root + '/images'
+num_classes = len(os.listdir(images_dir)))
+
 if torch.cuda.is_available():
     device = torch.device("cuda")
 else:
     device = torch.cuda.current_device()
+input_size = (224,224,3)
 
 transform = transforms.Compose([
                                 transforms.Resize(150), # Resize the short side of the image to 150 keeping aspect ratio
@@ -49,6 +52,12 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--batch_size', type=int, default=5, help='Batch size')
     parser.add_argument('-ld', '--logdir', default=(os.getcwd() + r'/tf_logs'), help='Location of saved tf.summary')
     args = parser.parse_args()
+
+    model = resnet50(pretrained=True)
+    for param in model.parameters():
+        para.requires_grad = False
+    ftrs = model.fc.in_features
+    model.fc = nn.Linear(features, num_classes)
 
     train_dataset = ImageFolder(images_dir, transform=transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
