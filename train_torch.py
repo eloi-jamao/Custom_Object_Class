@@ -14,12 +14,12 @@ from tqdm import tqdm
 
 root = os.getcwd()
 images_dir = root + '/images'
-num_classes = len(os.listdir(images_dir)))
+num_classes = len(os.listdir(images_dir))
 model_path = root + '/model_weights/weights0'
 input_size = (224,224,3)
 
 if torch.cuda.is_available():
-    device = torch.device("cuda")
+    device = torch.device("cpu")
 else:
     device = torch.cuda.current_device()
 
@@ -38,7 +38,7 @@ class custom_resnet(nn.Module):
 
           in_features = self.base_model.fc.in_features
           self.base_model.fc = nn.Linear(in_features, num_classes)
-          self.activation = nn.Sigmoid()
+          self.activation = nn.Softmax(dim = 1)
 
     def forward(self, x):
         x = self.base_model(x)
@@ -53,8 +53,8 @@ def train_model(model, optimizer, criterion, train_loader, epochs):
         train_loop = tqdm(train_loader, unit=" batches")  # For printing the progress bar
         for data, target in train_loop:
             train_loop.set_description('[TRAIN] Epoch {}/{}'.format(epoch + 1, epochs))
-            data, target = data.float().to(device), target.float().to(device)
-            target = target.unsqueeze(-1)
+            data, target = data.float().to(device), target.to(device)
+            #target = target.unsqueeze(-1)
             optimizer.zero_grad()
             output = model(data)
             #print(output, target)
@@ -74,10 +74,12 @@ if __name__ == '__main__':
     train_dataset = ImageFolder(images_dir, transform=transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
 
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    
     loss = nn.CrossEntropyLoss()
     model = custom_resnet()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     train_model(model, optimizer, loss, train_loader, args.num_epochs)
+
 
     torch.save(model.state_dict(), model_path)

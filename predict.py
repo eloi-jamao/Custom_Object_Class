@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy
 import torchvision.transforms as transforms
 from torchvision.models import resnet50
 import os
@@ -18,7 +19,7 @@ transform = transforms.Compose([
                                 ])
 
 class custom_resnet(nn.Module):
-    def __init__(self, num_classes=1):
+    def __init__(self, num_classes=num_classes):
           super(custom_resnet, self).__init__()
           self.base_model = resnet50(pretrained=True)
           for param in self.base_model.parameters():
@@ -26,7 +27,7 @@ class custom_resnet(nn.Module):
 
           in_features = self.base_model.fc.in_features
           self.base_model.fc = nn.Linear(in_features, num_classes)
-          self.activation = nn.Sigmoid()
+          self.activation = nn.Softmax(dim = 1)
 
     def forward(self, x):
         x = self.base_model(x)
@@ -41,17 +42,17 @@ def image_loader(image_name):
     image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
     return image
 
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=' ')
-    parser.add_argument('-i', '--image', help='image to predict')
+    parser.add_argument('-i', '--image', help='image path to predict')
     args = parser.parse_args()
 
     model = custom_resnet()
     model.load_state_dict(torch.load(weights_path))
     model.eval()
-    img_path = images_dir + '/grinder/' + args.image
+    img_path = images_dir + args.image
     data = image_loader(img_path)
     preds = model(data)
-    print(preds)
+    for class_, probability in zip(os.listdir(images_dir), preds[0]):
+      print("Class: {} ; Probability: {:.2f}".format(class_, probability.detach().numpy()))
+
