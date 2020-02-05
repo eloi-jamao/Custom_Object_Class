@@ -30,7 +30,7 @@ transform = transforms.Compose([
                                 ])
 
 class custom_resnet(nn.Module):
-    def __init__(self, num_classes=1):
+    def __init__(self, num_classes=num_classes):
           super(custom_resnet, self).__init__()
           self.base_model = resnet50(pretrained=True)
           for param in self.base_model.parameters():
@@ -38,11 +38,11 @@ class custom_resnet(nn.Module):
 
           in_features = self.base_model.fc.in_features
           self.base_model.fc = nn.Linear(in_features, num_classes)
-          self.activation = nn.Sigmoid()
+
 
     def forward(self, x):
-        x = self.base_model(x)
-        y = self.activation(x)
+        y = self.base_model(x)
+
         return y
 
 
@@ -54,11 +54,11 @@ def train_model(model, optimizer, criterion, train_loader, epochs):
         train_loop = tqdm(train_loader, unit=" batches")  # For printing the progress bar
         for data, target in train_loop:
             train_loop.set_description('[TRAIN] Epoch {}/{}'.format(epoch + 1, epochs))
-            data, target = data.float().to(device), target.float().to(device)
-            target = target.unsqueeze(-1)
+            data, target = data.float().to(device), target.long().to(device)
+            #target = target.unsqueeze(-1)
             optimizer.zero_grad()
             output = model(data)
-            #print(output, target)
+            #print(output.shape, target.shape)
             loss = criterion(output, target)
             loss.backward()
             optimizer.step()
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     model = custom_resnet()
 
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    loss = nn.BCELoss()
+    loss = nn.CrossEntropyLoss()
     train_model(model, optimizer, loss, train_loader, args.num_epochs)
 
     torch.save(model.state_dict(), model_path)

@@ -18,7 +18,7 @@ transform = transforms.Compose([
                                 ])
 
 class custom_resnet(nn.Module):
-    def __init__(self, num_classes=1):
+    def __init__(self, num_classes=num_classes):
           super(custom_resnet, self).__init__()
           self.base_model = resnet50(pretrained=True)
           for param in self.base_model.parameters():
@@ -26,11 +26,10 @@ class custom_resnet(nn.Module):
 
           in_features = self.base_model.fc.in_features
           self.base_model.fc = nn.Linear(in_features, num_classes)
-          self.activation = nn.Sigmoid()
+
 
     def forward(self, x):
-        x = self.base_model(x)
-        y = self.activation(x)
+        y = self.base_model(x)
         return y
 
 def image_loader(image_name):
@@ -41,7 +40,14 @@ def image_loader(image_name):
     image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
     return image
 
-
+def decode_preds(predictions):
+    predictions = predictions.squeeze(dim=0)
+    soft = nn.Softmax(dim=0)
+    norm_preds = soft(predictions)
+    index = torch.argmax(predictions)
+    labels = os.listdir(images_dir)
+    labels.reverse()
+    return labels[index], norm_preds[index]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=' ')
@@ -51,7 +57,8 @@ if __name__ == '__main__':
     model = custom_resnet()
     model.load_state_dict(torch.load(weights_path))
     model.eval()
-    img_path = images_dir + '/grinder/' + args.image
+    img_path = images_dir + args.image
     data = image_loader(img_path)
     preds = model(data)
-    print(preds)
+    label, confidence = decode_preds(preds)
+    print(f'I see a {label} in your picture with a confidence of {confidence}')
