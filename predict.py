@@ -42,6 +42,7 @@ def image_loader(image_name):
     image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
     return image
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=' ')
     parser.add_argument('-i', '--image', help='image path to predict')
@@ -53,6 +54,8 @@ if __name__ == '__main__':
     img_path = images_dir + args.image
     data = image_loader(img_path)
     preds = model(data)
+
+    #Print Results
     for class_, probability in zip(os.listdir(images_dir), preds[0]):
       print("Class: {} ; Probability: {:.2f}".format(class_, probability.detach().numpy()))
 

@@ -74,6 +74,17 @@ if __name__ == '__main__':
     train_dataset = ImageFolder(images_dir, transform=transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
 
+    it=iter(train_loader)
+
+    for image,label in train_loader:
+        print(len(train_dataset))
+        print(label[0])
+        plt.imshow(image[0].permute(1,2,0))
+        plt.show()
+        break
+
+
+
     
     loss = nn.CrossEntropyLoss()
     model = custom_resnet()
