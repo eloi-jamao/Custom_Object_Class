@@ -27,11 +27,10 @@ class custom_resnet(nn.Module):
 
           in_features = self.base_model.fc.in_features
           self.base_model.fc = nn.Linear(in_features, num_classes)
-          self.activation = nn.Softmax(dim = 1)
+
 
     def forward(self, x):
-        x = self.base_model(x)
-        y = self.activation(x)
+        y = self.base_model(x)
         return y
 
 def image_loader(image_name):
@@ -41,6 +40,16 @@ def image_loader(image_name):
     #image = Variable(image, requires_grad=True)
     image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
     return image
+
+
+def decode_preds(predictions):
+    predictions = predictions.squeeze(dim=0)
+    soft = nn.Softmax(dim=0)
+    norm_preds = soft(predictions)
+    index = torch.argmax(predictions)
+    labels = os.listdir(images_dir)
+    labels.reverse()
+    return labels[index], norm_preds[index]
 
 
 if __name__ == '__main__':
@@ -58,4 +67,3 @@ if __name__ == '__main__':
     #Print Results
     for class_, probability in zip(os.listdir(images_dir), preds[0]):
       print("Class: {} ; Probability: {:.2f}".format(class_, probability.detach().numpy()))
-

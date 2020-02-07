@@ -38,11 +38,11 @@ class custom_resnet(nn.Module):
 
           in_features = self.base_model.fc.in_features
           self.base_model.fc = nn.Linear(in_features, num_classes)
-          self.activation = nn.Softmax(dim = 1)
+
 
     def forward(self, x):
-        x = self.base_model(x)
-        y = self.activation(x)
+        y = self.base_model(x)
+
         return y
 
 def train_model(model, optimizer, criterion, train_loader, epochs):
@@ -57,7 +57,7 @@ def train_model(model, optimizer, criterion, train_loader, epochs):
             #target = target.unsqueeze(-1)
             optimizer.zero_grad()
             output = model(data)
-            #print(output, target)
+            #print(output.shape, target.shape)
             loss = criterion(output, target)
             loss.backward()
             optimizer.step()
@@ -84,13 +84,11 @@ if __name__ == '__main__':
         break
 
 
-
-    
     loss = nn.CrossEntropyLoss()
     model = custom_resnet()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
+    loss = nn.CrossEntropyLoss()
 
     train_model(model, optimizer, loss, train_loader, args.num_epochs)
-
 
     torch.save(model.state_dict(), model_path)
