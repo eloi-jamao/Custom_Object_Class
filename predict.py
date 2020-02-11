@@ -63,7 +63,7 @@ if __name__ == '__main__':
     model = Custom_resnet()
     model.load_state_dict(torch.load(weights_path))
     model.eval()
-    img_path = root + args.image
+    img_path = root + '/input/' + args.image
     data = image_loader(img_path)
     preds = model(data)
 
