@@ -26,16 +26,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-def execute(command):
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = process.communicate()[0]
-    exitCode = process.returncode
-
-    if (exitCode == 0):
-        return output
-    else:
-        raise ProcessException(command, exitCode, output)
-
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 
@@ -66,17 +56,6 @@ def save_img(update, context):
     out = proc.communicate()[0]
 
     update.message.reply_text(out.decode("utf-8"))
-    '''
-    model = pred.Custom_resnet()
-    model.load_state_dict(torch.load(weights_path))
-    model.eval()
-    img_path = root + '/input/user_photo.jpg'
-    data = pred.image_loader(img_path)
-    preds = model(data)
-    #Print Results
-    label, confidence = pred.decode_preds(preds)
-    update.message.reply_text(f"Class: {label} ; Probability: {100*confidence}")
-    '''
 
 def error(update, context):
     """Log Errors caused by Updates."""
