@@ -19,9 +19,9 @@ transform = transforms.Compose([
                                 transforms.ToTensor(), # Convert the image to a tensor with pixels in the range [0, 1]
                                 ])
 
-class custom_resnet(nn.Module):
+class Custom_resnet(nn.Module):
     def __init__(self, num_classes=num_classes):
-          super(custom_resnet, self).__init__()
+          super(Custom_resnet, self).__init__()
           self.base_model = resnet50(pretrained=True)
           for param in self.base_model.parameters():
               param.requires_grad = False
@@ -51,7 +51,8 @@ def decode_preds(predictions):
     labels = os.listdir(images_dir)
     labels.sort()
     print(f"Class: {labels[index]} ; Probability: {100*norm_preds[index]}")
-    #return labels[index], norm_preds[index]
+    return labels[index], norm_preds[index]
+
 
 
 if __name__ == '__main__':
@@ -59,15 +60,15 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--image', help='image path to predict')
     args = parser.parse_args()
 
-    model = custom_resnet()
+    model = Custom_resnet()
     model.load_state_dict(torch.load(weights_path))
     model.eval()
-    img_path = test_dir + args.image
+    img_path = root + args.image
     data = image_loader(img_path)
     preds = model(data)
 
     #Print Results
-    decode_preds(preds)
+    label, confidence = decode_preds(preds)
 
 
     '''
