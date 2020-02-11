@@ -9,8 +9,9 @@ from PIL import Image
 
 root = os.getcwd()
 images_dir = root + '/images'
+test_dir = root + '/test'
 num_classes = len(os.listdir(images_dir))
-weights_path = root + '/model_weights' + '/weights0'
+weights_path = root + '/model_weights' + '/weights1'
 
 transform = transforms.Compose([
                                 transforms.Resize(224), # Resize the short side of the image to 150 keeping aspect ratio
@@ -48,8 +49,9 @@ def decode_preds(predictions):
     norm_preds = soft(predictions)
     index = torch.argmax(predictions)
     labels = os.listdir(images_dir)
-    labels.reverse()
-    return labels[index], norm_preds[index]
+    labels.sort()
+    print(f"Class: {labels[index]} ; Probability: {100*norm_preds[index]}")
+    #return labels[index], norm_preds[index]
 
 
 if __name__ == '__main__':
@@ -60,10 +62,15 @@ if __name__ == '__main__':
     model = custom_resnet()
     model.load_state_dict(torch.load(weights_path))
     model.eval()
-    img_path = images_dir + args.image
+    img_path = test_dir + args.image
     data = image_loader(img_path)
     preds = model(data)
 
     #Print Results
+    decode_preds(preds)
+
+
+    '''
     for class_, probability in zip(os.listdir(images_dir), preds[0]):
-      print("Class: {} ; Probability: {:.2f}".format(class_, probability.detach().numpy()))
+        print("Class: {} ; Probability: {:.2f}".format(class_, probability.detach().numpy()))
+    '''
