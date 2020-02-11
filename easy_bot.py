@@ -13,8 +13,8 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 import os
-import subprocess
 import logging
+import subprocess
 #from predict import Custom_resnet, image_loader, decode_preds
 import predict as pred
 
@@ -61,9 +61,11 @@ def save_img(update, context):
     photo_file = update.message.photo[-1].get_file()
     photo_file.download('input/user_photo.jpg')
     update.message.reply_text('Photo received! Processing...')
-    #out = os.system(f'python3 hello.py -i user_photo.jpg')
-    out = execute('python3 hello.py -i /input/user_photo.jpg')
-    update.message.reply_text(out)
+
+    proc = subprocess.Popen(['python3', 'predict.py',  '-iuser_photo.jpg'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out = proc.communicate()[0]
+
+    update.message.reply_text(out.decode("utf-8"))
     '''
     model = pred.Custom_resnet()
     model.load_state_dict(torch.load(weights_path))
