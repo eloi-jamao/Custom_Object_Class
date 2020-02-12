@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import os
 import argparse
 from tqdm import tqdm
-
+import math
 root = os.getcwd()
 images_dir = root + '/images'
 test_dir = root + '/test'
@@ -79,7 +79,7 @@ def test_model(model,test_loader, epochs):
                 #print(output.shape, target.shape)
                 acc += correct_predictions(output, target)
         acc = 100. * acc / len(test_loader.dataset)
-        print(f'Test accuracy of {acc}')
+        print(f'Test accuracy of {math.trunc(acc)}')
 
 def correct_predictions(predicted_batch, label_batch):
   pred = predicted_batch.argmax(dim=1, keepdim=True) # get the index of the max log-probability

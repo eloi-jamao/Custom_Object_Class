@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     #Print Results
     label, confidence = decode_preds(preds)
-
+    os.remove(img_path)
 
     '''
     for class_, probability in zip(os.listdir(images_dir), preds[0]):

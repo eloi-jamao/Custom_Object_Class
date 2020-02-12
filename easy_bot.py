@@ -15,11 +15,9 @@ bot.
 import os
 import logging
 import subprocess
-#from predict import Custom_resnet, image_loader, decode_preds
-import predict as pred
-
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
+label = ''
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -31,28 +29,45 @@ logger = logging.getLogger(__name__)
 
 def echo(update, context):
     """Echo the user message."""
-    update.message.reply_text('Hi! Type /train , /predict, or /video')
+    update.message.reply_text('Hi! Type /train , /predict, /video or /classes')
+
+def classes(update, context):
+    """Reply with current classes"""
+    update.message.reply_text(os.listdir(os.getcwd()+'/images'))
 
 def train(update, context):
-    update.message.reply_text('Training model...')
-    #Add training here somehow
-    update.message.reply_text('Done!')
+    update.message.reply_text('Training model... This may take a while, you can come back later for the results.')
+    proc = subprocess.Popen(['python3', 'train_torch.py', '-tTrue'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out = proc.communicate()[0]
+    update.message.reply_text(f'Done! Model with {out.decode("utf-8")[-21:-2]}%')
 
 def predict(update, context):
     update.message.reply_text('Go ahead, send a picture to predict.')
 
 def video(update, context):
-    update.message.reply_text('Go ahead, send a video to save.')
+    global label
+    label = ' '.join(context.args)
+    if label == '':
+        update.message.reply_text('Add the label of the object after /video')
+    else:
+        update.message.reply_text('Go ahead, send a video to save.')
 
 def process_video(update, context):
-    pass
+    global label
+    video_file = update.message.video.get_file()
+    video_file.download(f'input/{label}')
+    update.message.reply_text(f'Video of a {label} received! Processing...')
+    label = ''
+    proc = subprocess.Popen(['python3', 'video2frames.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out = proc.communicate()[0]
+    update.message.reply_text(out.decode("utf-8"))
 
 def save_img(update, context):
     photo_file = update.message.photo[-1].get_file()
-    photo_file.download('input/user_photo.jpg')
+    photo_file.download('input/photo')
     update.message.reply_text('Photo received! Processing...')
 
-    proc = subprocess.Popen(['python3', 'predict.py',  '-iuser_photo.jpg'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(['python3', 'predict.py',  '-iphoto'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out = proc.communicate()[0]
 
     update.message.reply_text(out.decode("utf-8"))
@@ -67,7 +82,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater("TOKEN", use_context=True)
+    updater = Updater(open('token.txt').read()[:-1], use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -78,6 +93,7 @@ def main():
     dp.add_handler(CommandHandler("train", train))
     dp.add_handler(CommandHandler("predict", predict))
     dp.add_handler(CommandHandler("video", video))
+    dp.add_handler(CommandHandler("classes", classes))
 
     dp.add_handler(MessageHandler(Filters.text, echo))
     dp.add_handler(MessageHandler(Filters.video, process_video))
